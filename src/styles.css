@@ -1,0 +1,50 @@
+/*
+
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
+
+If your plugin does not need CSS, delete this file.
+
+*/
+
+.pasta-folder-title-icon {
+	background: var(--color-accent);
+	color: white;
+	border-radius: 10px;
+	text-align: center;
+	padding-left: 5px;
+	padding-right: 4px;
+}
+
+.cm-pasta-caret-wrap {
+	position: relative;
+	display: inline-block;
+	pointer-events: none;
+	--caret-color: var(--color-accent);
+	--caret-text-color: var(--text-normal);
+}
+
+.cm-pasta-caret {
+	display: inline-block;
+	border-left: 2px solid var(--caret-color);
+	margin-left: -2px;
+	height: 1em;
+	pointer-events: none;
+	transform: translateY(0.15em);
+}
+
+.cm-pasta-caret-label {
+	position: absolute;
+	top: -1em;
+	left: -2px;
+	font-size: 12px;
+	line-height: 1;
+	padding: 2px 3px;
+	white-space: nowrap;
+	background: var(--caret-color);
+	color: white;
+}
+
+.cm-pasta-selection {
+	background-color: var(--selection-color);
+}
