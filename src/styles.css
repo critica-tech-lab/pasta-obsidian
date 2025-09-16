@@ -48,3 +48,9 @@ If your plugin does not need CSS, delete this file.
 .cm-pasta-selection {
 	background-color: var(--selection-color);
 }
+
+.nav-file-tag.enabled {
+	padding-top: 0;
+	background-color: var(--color-accent);
+	color: white !important;
+}

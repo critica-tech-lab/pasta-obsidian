@@ -52,9 +52,16 @@ export class PastaSettingsTab extends PluginSettingTab {
 							this.display(); // re-render UI
 						});
 					})
-					.addToggle(
-						(toggle) => toggle.setValue(!!entry.enabled),
-						// .onChange((value) => onToggle(index, value)),
+					.addToggle((toggle) =>
+						toggle
+							.setValue(!!entry.enabled)
+							.onChange(async (enabled) => {
+								if (enabled) {
+									await this.plugin.enableFolder(entry.path);
+								} else {
+									await this.plugin.disableFolder(entry.path);
+								}
+							}),
 					);
 			});
 		} else {

@@ -52,7 +52,7 @@ export class EthersyncClient {
 
 		// A potential improvement would be an exponential
 		// backoff reconnection strategy
-		setTimeout(() => this.connect(), 100);
+		setTimeout(() => this.connect(), 500);
 	}
 
 	connect() {

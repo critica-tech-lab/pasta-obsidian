@@ -66,32 +66,87 @@ export default class PastaSyncPlugin extends Plugin {
 			return;
 		}
 
-		for (const folder of this.settings.folders.values()) {
+		for (const [id, folder] of this.settings.folders) {
 			const ethersyncDir = [vaultBasePath, folder.path].join("/");
 
 			if (folder.enabled) {
 				if (folder.mode === "share") {
-					await this.shareFolder(ethersyncDir);
+					await this.shareFolder(id, ethersyncDir);
 				} else if (folder.mode === "join") {
-					await this.joinFolder(ethersyncDir);
+					await this.joinFolder(id, ethersyncDir);
 				}
 			}
 		}
 
+		// TODO: improve timeout
+		setTimeout(() => {
+			this.decorateFolders();
+		}, 100);
+	}
+
+	async shareFolder(
+		id: string,
+		path: string,
+		onCode?: (code: string) => void,
+	) {
+		this.processes.set(id, await ethersyncShareProcess(path, onCode));
+	}
+
+	async joinFolder(id: string, path: string, code?: string) {
+		this.processes.set(id, await ethersyncJoinProcess(path, code));
+	}
+
+	async enableFolder(id: string) {
+		const { folders } = this.settings;
+		const vaultBasePath = getVaultBasePath(this.app.vault);
+
+		if (!vaultBasePath) {
+			return;
+		}
+
+		const folder = folders.get(id);
+
+		if (!folder) {
+			return;
+		}
+
+		folders.set(id, { ...folder, enabled: true });
+		await this.saveSettings();
+
 		this.decorateFolders();
+
+		const absoluteFolderPath = [vaultBasePath, folder.path].join("/");
+
+		switch (folder.mode) {
+			case "share":
+				return this.shareFolder(id, absoluteFolderPath);
+			case "join":
+				return this.joinFolder(id, absoluteFolderPath);
+		}
 	}
 
-	async shareFolder(path: string, onCode?: (code: string) => void) {
-		this.processes.set(path, await ethersyncShareProcess(path, onCode));
+	async disableFolder(id: string) {
+		const { folders } = this.settings;
+		const folder = folders.get(id);
+
+		if (!folder) {
+			return;
+		}
+
+		folders.set(id, { ...folder, enabled: false });
+		await this.saveSettings();
+
+		this.decorateFolders();
+
+		const process = this.processes.get(id);
+
+		if (process) {
+			process.kill();
+		}
 	}
 
-	async joinFolder(path: string, code?: string) {
-		this.processes.set(path, await ethersyncJoinProcess(path, code));
-	}
-
+	// TODO: paint with color if folder is enabled
 	decorateFolders() {
-		// Iterate over all first-level folders
-		console.warn(this);
 		const items =
 			document.querySelectorAll<HTMLDivElement>(`.nav-folder-title`);
 
@@ -102,15 +157,18 @@ export default class PastaSyncPlugin extends Plugin {
 				return;
 			}
 
+			const folder = this.settings.folders.get(path);
 			let icon = item.querySelector(".nav-file-tag");
 
-			if (this.settings.folders.has(path)) {
+			if (folder) {
 				if (!icon) {
 					icon = document.createElement("div");
-					icon.className = "nav-file-tag";
 					icon.innerHTML = "Pasta";
 					item.appendChild(icon);
 				}
+
+				icon.className =
+					"nav-file-tag" + (folder.enabled ? " enabled" : "");
 			} else {
 				if (icon) {
 					icon.remove();
@@ -129,18 +187,32 @@ export default class PastaSyncPlugin extends Plugin {
 		const vaultPath = getVaultBasePath(this.app.vault);
 		if (!vaultPath) return;
 
-		const absoluteFolderPath = [vaultPath, file.path].join("/");
-
-		if (this.processes.has(absoluteFolderPath)) {
+		if (file instanceof TFolder && file.parent?.isRoot) {
 			menu.addItem((item) => {
-				item.setTitle("Pasta: Settings").onClick(async () => {
+				item.setTitle("Pasta: Open settings").onClick(async () => {
 					await this.openSettings();
 				});
 			});
+		}
+
+		if (this.settings.folders.has(file.path)) {
+			if (this.processes.has(file.path)) {
+				menu.addItem((item) => {
+					item.setTitle("Pasta: Disable folder").onClick(async () => {
+						await this.disableFolder(file.path);
+					});
+				});
+			} else {
+				menu.addItem((item) => {
+					item.setTitle("Pasta: Enable folder").onClick(async () => {
+						await this.enableFolder(file.path);
+					});
+				});
+			}
 		} else {
 			if (file instanceof TFolder && file.parent?.isRoot()) {
 				menu.addItem((item) => {
-					item.setTitle("Pasta: Share").onClick(async () => {
+					item.setTitle("Pasta: Share folder").onClick(async () => {
 						await this.addShareFolder(file.path);
 					});
 				});
@@ -175,6 +247,12 @@ export default class PastaSyncPlugin extends Plugin {
 
 		if (!inEthersyncFolder) {
 			console.debug("file not in a Ethersync folder. ignoring...");
+			return;
+		}
+
+		const folder = markdownView.file.parent;
+
+		if (folder && !this.processes.has(folder.path)) {
 			return;
 		}
 
@@ -307,16 +385,44 @@ export default class PastaSyncPlugin extends Plugin {
 			return;
 		}
 
-		const folder = await this.getEthersyncFolder(file, this.app.vault);
+		// TODO: allow nested detection
+		const folder = file.parent;
 
-		if (!folder) {
+		if (!folder || !this.settings.folders.has(folder.path)) {
+			console.warn("ethersync supported, but no process");
 			return;
 		}
 
+		let retries = 3;
+
+		while (retries > 0) {
+			try {
+				await this.createEditorConnection(file, vaultPath);
+				return;
+			} catch (e) {
+				console.warn("error attempting to connect:", e);
+			}
+
+			retries--;
+
+			await new Promise((resolve) => setTimeout(resolve, 3000));
+		}
+	}
+
+	async createEditorConnection(file: TFile, vaultPath: string) {
 		const content = await this.app.vault.read(file);
 
+		const ethersyncFolder = await this.getEthersyncFolder(
+			file,
+			this.app.vault,
+		);
+
+		if (!ethersyncFolder) {
+			return;
+		}
+
 		const connection = new EthersyncClient(
-			[folder, "socket"].join("/"),
+			[ethersyncFolder, "socket"].join("/"),
 			content,
 			"file://" + [vaultPath, file.path].join("/"),
 			this.onUserCursor.bind(this),
@@ -386,7 +492,7 @@ export default class PastaSyncPlugin extends Plugin {
 
 			await this.saveSettings();
 
-			await this.joinFolder([vaultPath, path].join("/"), code);
+			await this.joinFolder(path, [vaultPath, path].join("/"), code);
 
 			this.decorateFolders();
 		}).open();
@@ -404,7 +510,7 @@ export default class PastaSyncPlugin extends Plugin {
 
 		await this.saveSettings();
 
-		await this.shareFolder([vaultPath, path].join("/"), (code) => {
+		await this.shareFolder(path, [vaultPath, path].join("/"), (code) => {
 			new ShareCodeModal(this.app, code).open();
 		});
 
@@ -431,6 +537,12 @@ export default class PastaSyncPlugin extends Plugin {
 		this.settings.folders.delete(path);
 
 		await this.saveSettings();
+
+		const process = this.processes.get(path);
+
+		if (process) {
+			process.kill();
+		}
 
 		this.decorateFolders();
 	}
