@@ -47,7 +47,6 @@ export class EthersyncClient {
 		private uri: string,
 		private onCursor: (params: UserCursorMessageParams) => void,
 	) {
-		// console.warn("attempt to connect to", socketPath);
 		this.socket = new Socket();
 
 		// A potential improvement would be an exponential

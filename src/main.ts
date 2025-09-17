@@ -141,8 +141,6 @@ export default class PastaSyncPlugin extends Plugin {
 	async loadSettings() {
 		const data = await this.loadData();
 
-		console.warn({ data });
-
 		this.settings = Object.assign({}, PASTA_SYNC_DEFAULT_SETTINGS, {
 			...data,
 			folders: Array.isArray(data?.folders)

@@ -115,8 +115,6 @@ export class EditorSyncManager {
 		const path = message.uri.replace("file://" + vaultPath + "/", "");
 
 		if (message.ranges.length === 0) {
-			console.warn("remove user id", message.userid);
-
 			for (const editor of this.editors.values()) {
 				editor.userCursors.delete(message.userid);
 
@@ -176,7 +174,6 @@ export class EditorSyncManager {
 		const folder = file.parent;
 
 		if (!folder || !this.settings.folders.has(folder.path)) {
-			console.warn("ethersync supported, but no process");
 			return;
 		}
 
@@ -187,7 +184,7 @@ export class EditorSyncManager {
 				await this.createEditorConnection(file, vaultPath);
 				return;
 			} catch (e) {
-				console.warn("error attempting to connect:", e);
+				console.error("error attempting to connect:", e);
 			}
 
 			retries--;

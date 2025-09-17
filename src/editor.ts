@@ -29,7 +29,7 @@ class CaretWidget extends WidgetType {
 
 	toDOM() {
 		const wrap = document.createElement("span");
-		wrap.className = "cm-pasta-caret-wrap";
+		wrap.className = "pasta-caret-wrap";
 		wrap.style.setProperty("--caret-color", this.color);
 
 		wrap.style.setProperty(
@@ -38,11 +38,11 @@ class CaretWidget extends WidgetType {
 		);
 
 		const bar = document.createElement("span");
-		bar.className = "cm-pasta-caret";
+		bar.className = "pasta-caret";
 		wrap.appendChild(bar);
 
 		const tag = document.createElement("span");
-		tag.className = "cm-pasta-caret-label";
+		tag.className = "pasta-caret-label";
 		tag.textContent = this.label;
 		wrap.appendChild(tag);
 
@@ -68,12 +68,11 @@ function render(
 		const to = clamp(Math.max(c.from, c.to), 0, state.doc.length);
 
 		if (from !== to) {
-			console.log(c.color);
 			ranges.push({
 				from,
 				to,
 				deco: Decoration.mark({
-					class: "cm-pasta-selection",
+					class: "pasta-selection",
 					attributes: {
 						style: `--selection-color: ${hexToRgba(c.color, 0.5)}`,
 					},

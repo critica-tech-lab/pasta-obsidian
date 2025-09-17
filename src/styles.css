@@ -16,7 +16,7 @@ If your plugin does not need CSS, delete this file.
 	padding-right: 4px;
 }
 
-.cm-pasta-caret-wrap {
+.pasta-caret-wrap {
 	position: relative;
 	display: inline-block;
 	pointer-events: none;
@@ -24,7 +24,7 @@ If your plugin does not need CSS, delete this file.
 	--caret-text-color: var(--text-normal);
 }
 
-.cm-pasta-caret {
+.pasta-caret {
 	display: inline-block;
 	border-left: 2px solid var(--caret-color);
 	margin-left: -2px;
@@ -33,7 +33,7 @@ If your plugin does not need CSS, delete this file.
 	transform: translateY(0.15em);
 }
 
-.cm-pasta-caret-label {
+.pasta-caret-label {
 	position: absolute;
 	top: -1em;
 	left: -2px;
@@ -45,7 +45,7 @@ If your plugin does not need CSS, delete this file.
 	color: white;
 }
 
-.cm-pasta-selection {
+.pasta-selection {
 	background-color: var(--selection-color);
 }
 
