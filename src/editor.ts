@@ -7,7 +7,7 @@ import {
 	ViewUpdate,
 	WidgetType,
 } from "@codemirror/view";
-import { PastaEditorCursor } from "./main";
+import { PastaEditorCursor } from "./types/editor";
 
 export type CursorOptions = {
 	onCursorChange: (
