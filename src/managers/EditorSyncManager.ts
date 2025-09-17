@@ -1,8 +1,8 @@
 import { EditorSelection, Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { App, MarkdownView, TFile } from "obsidian";
-import { cursorsExtension } from "../editor";
 import { getColorForString } from "../color";
+import { cursorsExtension } from "../editor";
 import { EthersyncClient, UserCursorMessageParams } from "../ethersync";
 import { PastaSyncSettings } from "../settings";
 import { PastaEditorCursor } from "../types/editor";
@@ -56,14 +56,12 @@ export class EditorSyncManager {
 			return;
 		}
 
-		const file = markdownView.file;
+		const { file } = markdownView;
 
-		const folderParent = file.parent;
-
-		if (!folderParent || !this.settings.folders.has(folderParent.path)) {
+		if (!file.parent || !this.settings.folders.has(file.parent.path)) {
 			return;
 		}
-		if (!this.folders.hasActiveProcess(folderParent.path)) {
+		if (!this.folders.hasActiveProcess(file.parent.path)) {
 			return;
 		}
 
@@ -195,7 +193,6 @@ export class EditorSyncManager {
 
 	private async createEditorConnection(file: TFile, vaultPath: string) {
 		const content = await this.app.vault.read(file);
-
 		const ethersyncFolder = await getEthersyncFolder(file, this.app.vault);
 
 		if (!ethersyncFolder) {
@@ -231,10 +228,6 @@ export class EditorSyncManager {
 
 		if (!mdView) return null;
 
-		// Obsidian's editor is a wrapper around CM6
-		// `cm` is CodeMirror 6's EditorView
-		// ⚠️ not part of the public API, but stable across CM6 versions
-		// (in CM5 days it was different)
 		// @ts-ignore to bypass type mismatch
 		return ((mdView.editor as any).cm as EditorView) ?? null;
 	}
