@@ -1,7 +1,8 @@
 import { EditorSelection, Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { App, MarkdownView, TFile } from "obsidian";
-import { cursorsExtension, getColorForString } from "../editor";
+import { cursorsExtension } from "../editor";
+import { getColorForString } from "../color";
 import { EthersyncClient, UserCursorMessageParams } from "../ethersync";
 import { PastaSyncSettings } from "../settings";
 import { PastaEditorCursor } from "../types/editor";

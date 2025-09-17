@@ -8,6 +8,7 @@ import {
 	WidgetType,
 } from "@codemirror/view";
 import { PastaEditorCursor } from "./types/editor";
+import { getTextColorForBackground, hexToRgba } from "./color";
 
 export type CursorOptions = {
 	onCursorChange: (
@@ -173,70 +174,4 @@ export function cursorsExtension(options: CursorOptions) {
 		extension: [remoteCursors, localCursorWatcher(options)],
 		updateCursors,
 	};
-}
-
-const FLEXOKI: readonly string[] = [
-	"#D14D41",
-	"#DA702C",
-	"#D0A215",
-	"#879A39",
-	"#3AA99F",
-	"#3AA99F",
-	"#4385BE",
-	"#8B7EC8",
-	"#CE5D97",
-];
-
-// Fast 53-bit string hash with good avalanche
-function cyrb53(str: string, seed = 0): number {
-	let h1 = 0xdeadbeef ^ seed,
-		h2 = 0x41c6ce57 ^ seed;
-	for (let i = 0, ch; i < str.length; i++) {
-		ch = str.charCodeAt(i);
-		h1 = Math.imul(h1 ^ ch, 2654435761);
-		h2 = Math.imul(h2 ^ ch, 1597334677);
-	}
-	h1 =
-		Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^
-		Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-	h2 =
-		Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^
-		Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-	return (h2 & 0x1fffff) * 0x100000000 + (h1 >>> 0);
-}
-
-export function getColorForString(id: string): string {
-	const h = cyrb53(id);
-	const idx = h % FLEXOKI.length;
-	return FLEXOKI[idx];
-}
-
-function getTextColorForBackground(backgroundColor: string) {
-	const hex = backgroundColor.replace("#", "");
-
-	// parse r, g, b
-	const r = parseInt(hex.substring(0, 2), 16);
-	const g = parseInt(hex.substring(2, 2), 16);
-	const b = parseInt(hex.substring(4, 2), 16);
-
-	// relative luminance (per WCAG)
-	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-	// pick text color
-	return luminance > 0.5 ? "black" : "white";
-}
-
-function hexToRgba(hex: string, alpha = 1) {
-	let c = hex.replace("#", "");
-	if (c.length === 3) {
-		// expand shorthand #abc → #aabbcc
-		c = c
-			.split("")
-			.map((ch) => ch + ch)
-			.join("");
-	}
-	const r = parseInt(c.slice(0, 2), 16);
-	const g = parseInt(c.slice(2, 4), 16);
-	const b = parseInt(c.slice(4, 6), 16);
-	return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
