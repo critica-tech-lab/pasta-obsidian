@@ -7,6 +7,18 @@ If your plugin does not need CSS, delete this file.
 
 */
 
+@keyframes caret-blink {
+	0% {
+		visibility: visible;
+	}
+	50% {
+		visibility: hidden;
+	}
+	100% {
+		visibility: visible;
+	}
+}
+
 .pasta-folder-title-icon {
 	background: var(--color-accent);
 	color: white;
@@ -31,6 +43,7 @@ If your plugin does not need CSS, delete this file.
 	height: 1em;
 	pointer-events: none;
 	transform: translateY(0.15em);
+	animation: caret-blink 1s steps(1, end) infinite;
 }
 
 .pasta-caret-label {
@@ -39,8 +52,10 @@ If your plugin does not need CSS, delete this file.
 	left: -2px;
 	font-size: 12px;
 	line-height: 1;
-	padding: 2px 3px;
+	padding: 2px 4px;
 	white-space: nowrap;
+	border-radius: 2px;
+	border-bottom-left-radius: 0;
 	background: var(--caret-color);
 	color: white;
 }
