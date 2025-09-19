@@ -1,23 +1,21 @@
 import { ChildProcess } from "child_process";
-import { App } from "obsidian";
 import {
 	EthersyncFolder,
 	ethersyncJoinProcess,
 	ethersyncShareProcess,
 } from "../ethersync";
 import { PastaSyncSettings } from "../settings";
-import { getVaultBasePath } from "../vault";
 
 type StartProcessOptions = {
 	code?: string;
 	onShareCode?: (code: string) => void;
 };
 
-export class FolderSyncManager {
+export class EthersyncManager {
 	private processes: Map<string, ChildProcess> = new Map();
 
 	constructor(
-		private app: App,
+		private vaultPath: string | undefined,
 		private settings: PastaSyncSettings,
 		private persistSettings: () => Promise<void>,
 	) {}
@@ -46,8 +44,8 @@ export class FolderSyncManager {
 		const folder = this.settings.folders.get(id);
 		if (!folder || !folder.enabled) return;
 
-		const absolutePath = this.resolveAbsolutePath(folder.path);
-		if (!absolutePath) return;
+		if (!this.vaultPath) return;
+		const absolutePath = [this.vaultPath, folder.path].join("/");
 
 		await this.startProcess(id, folder, absolutePath, options);
 	}
@@ -117,10 +115,4 @@ export class FolderSyncManager {
 		this.processes.delete(id);
 	}
 
-	private resolveAbsolutePath(path: string) {
-		const vaultBasePath = getVaultBasePath(this.app.vault);
-		if (!vaultBasePath) return;
-
-		return [vaultBasePath, path].join("/");
-	}
 }

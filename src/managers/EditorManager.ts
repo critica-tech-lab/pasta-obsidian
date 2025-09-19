@@ -7,7 +7,7 @@ import { EthersyncClient, UserCursorMessageParams } from "../ethersync";
 import { PastaSyncSettings } from "../settings";
 import { PastaEditorCursor } from "../types/editor";
 import { getEthersyncFolder, getVaultBasePath } from "../vault";
-import { FolderSyncManager } from "./FolderSyncManager";
+import { EthersyncManager } from "./EthersyncManager";
 
 type PastaEditor = {
 	connection: EthersyncClient;
@@ -19,7 +19,7 @@ type CursorRange = {
 	end: { line: number; character: number };
 };
 
-export class EditorSyncManager {
+export class EditorManager {
 	private editors: Map<string, PastaEditor> = new Map();
 	private cursorExtension!: Extension[];
 	private updateCursors!: (
@@ -30,7 +30,7 @@ export class EditorSyncManager {
 	constructor(
 		private app: App,
 		private settings: PastaSyncSettings,
-		private folders: FolderSyncManager,
+		private processManager: EthersyncManager,
 	) {
 		const { extension, updateCursors } = cursorsExtension({
 			onCursorChange: this.handleCursorChange.bind(this),
@@ -61,7 +61,7 @@ export class EditorSyncManager {
 		if (!file.parent || !this.settings.folders.has(file.parent.path)) {
 			return;
 		}
-		if (!this.folders.hasActiveProcess(file.parent.path)) {
+		if (!this.processManager.hasActiveProcess(file.parent.path)) {
 			return;
 		}
 

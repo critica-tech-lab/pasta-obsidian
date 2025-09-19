@@ -1,15 +1,15 @@
 import { App, Menu, TAbstractFile, TFolder } from "obsidian";
-import { FolderSyncManager } from "../managers/FolderSyncManager";
+import { EthersyncManager } from "../managers/EthersyncManager";
 import { PastaSyncSettings } from "../settings";
 import { JoinFolderModal } from "../modals/JoinFolderModal";
 import { ShareFolderModal } from "../modals/ShareFolderModal";
 import { ShareCodeModal } from "../modals/ShareCodeModal";
 
-export class ObsidianUIManager {
+export class ObsidianManager {
 	constructor(
 		private app: App,
 		private settings: PastaSyncSettings,
-		private folderSync: FolderSyncManager,
+		private processManager: EthersyncManager,
 		private persistSettings: () => Promise<void>,
 		private openSettings: () => Promise<void>,
 	) {}
@@ -52,18 +52,18 @@ export class ObsidianUIManager {
 			});
 		}
 
-		if (this.folderSync.isManagedFolder(file.path)) {
-			if (this.folderSync.hasActiveProcess(file.path)) {
+		if (this.processManager.isManagedFolder(file.path)) {
+			if (this.processManager.hasActiveProcess(file.path)) {
 				menu.addItem((item) => {
 					item.setTitle("Pasta: Disable folder").onClick(async () => {
-						await this.folderSync.disableFolder(file.path);
+						await this.processManager.disableFolder(file.path);
 						this.decorateFolders();
 					});
 				});
 			} else {
 				menu.addItem((item) => {
 					item.setTitle("Pasta: Enable folder").onClick(async () => {
-						await this.folderSync.enableFolder(file.path);
+						await this.processManager.enableFolder(file.path);
 						this.decorateFolders();
 					});
 				});
@@ -87,7 +87,7 @@ export class ObsidianUIManager {
 
 			await this.persistSettings();
 
-			await this.folderSync.startFolder(path, { code });
+			await this.processManager.startFolder(path, { code });
 
 			this.decorateFolders();
 		}).open();
@@ -118,7 +118,7 @@ export class ObsidianUIManager {
 
 		await this.persistSettings();
 
-		await this.folderSync.startFolder(path, {
+		await this.processManager.startFolder(path, {
 			onShareCode: (code) => {
 				new ShareCodeModal(this.app, code).open();
 			},

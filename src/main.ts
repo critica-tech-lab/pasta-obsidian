@@ -1,45 +1,48 @@
 import { Plugin, TFile } from "obsidian";
-import { FolderSyncManager } from "./managers/FolderSyncManager";
-import { EditorSyncManager } from "./managers/EditorSyncManager";
-import { ObsidianUIManager } from "./managers/ObsidianUIManager";
+import { EthersyncManager } from "./managers/EthersyncManager";
+import { EditorManager } from "./managers/EditorManager";
+import { ObsidianManager } from "./managers/ObsidianManager";
 import {
 	PastaSettingsTab,
 	PastaSyncSettings,
 	PASTA_SYNC_DEFAULT_SETTINGS,
 } from "./settings";
+import { getVaultBasePath } from "./vault";
 
 export default class PastaSyncPlugin extends Plugin {
 	public settings: PastaSyncSettings = PASTA_SYNC_DEFAULT_SETTINGS;
-	private folderSync!: FolderSyncManager;
-	private editorSync!: EditorSyncManager;
-	private ui!: ObsidianUIManager;
+	private processManager!: EthersyncManager;
+	private editorManager!: EditorManager;
+	private ui!: ObsidianManager;
 
 	async onload() {
 		await this.loadSettings();
 
 		this.addSettingTab(new PastaSettingsTab(this.app, this));
 
-		this.folderSync = new FolderSyncManager(
-			this.app,
+		const vaultPath = getVaultBasePath(this.app.vault);
+
+		this.processManager = new EthersyncManager(
+			vaultPath,
 			this.settings,
 			this.saveSettings.bind(this),
 		);
 
-		this.editorSync = new EditorSyncManager(
+		this.editorManager = new EditorManager(
 			this.app,
 			this.settings,
-			this.folderSync,
+			this.processManager,
 		);
 
-		this.ui = new ObsidianUIManager(
+		this.ui = new ObsidianManager(
 			this.app,
 			this.settings,
-			this.folderSync,
+			this.processManager,
 			this.saveSettings.bind(this),
 			this.openSettings.bind(this),
 		);
 
-		this.registerEditorExtension(this.editorSync.extension);
+		this.registerEditorExtension(this.editorManager.extension);
 
 		this.addCommand({
 			id: "pasta-join-folder",
@@ -78,7 +81,7 @@ export default class PastaSyncPlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on("file-open", (file) => {
 				const tFile = file instanceof TFile ? file : undefined;
-				void this.editorSync.handleFileOpen(tFile);
+				void this.editorManager.handleFileOpen(tFile);
 			}),
 		);
 
@@ -90,11 +93,11 @@ export default class PastaSyncPlugin extends Plugin {
 	}
 
 	onunload(): void {
-		this.folderSync.killAll();
+		this.processManager.killAll();
 	}
 
 	private async handleVaultReady() {
-		await this.folderSync.startConfiguredFolders();
+		await this.processManager.startConfiguredFolders();
 
 		setTimeout(() => {
 			this.ui.decorateFolders();
@@ -102,7 +105,7 @@ export default class PastaSyncPlugin extends Plugin {
 	}
 
 	private handleAppQuit() {
-		this.folderSync.killAll();
+		this.processManager.killAll();
 	}
 
 	async openSettings() {
@@ -120,17 +123,17 @@ export default class PastaSyncPlugin extends Plugin {
 	}
 
 	async enableFolder(id: string) {
-		await this.folderSync.enableFolder(id);
+		await this.processManager.enableFolder(id);
 		this.ui.decorateFolders();
 	}
 
 	async disableFolder(id: string) {
-		await this.folderSync.disableFolder(id);
+		await this.processManager.disableFolder(id);
 		this.ui.decorateFolders();
 	}
 
 	async removeFolder(path: string) {
-		await this.folderSync.removeFolder(path);
+		await this.processManager.removeFolder(path);
 		this.ui.decorateFolders();
 	}
 
