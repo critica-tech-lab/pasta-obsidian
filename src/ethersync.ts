@@ -113,7 +113,6 @@ export class EthersyncClient {
 		}
 
 		await backoff(async () => {
-			console.warn("attempting to write");
 			this.socket.write(JSON.stringify(message) + "\r\n", function (err) {
 				if (err)
 					console.error("[EthersyncClient] socket write error", err);

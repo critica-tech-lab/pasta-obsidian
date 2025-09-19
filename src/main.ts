@@ -70,10 +70,6 @@ export default class PastaSyncPlugin extends Plugin {
 		});
 
 		this.registerEvent(
-			this.app.workspace.on("quit", this.handleAppQuit.bind(this)),
-		);
-
-		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
 				this.ui.handleFileMenu(menu, file);
 			}),
@@ -91,10 +87,10 @@ export default class PastaSyncPlugin extends Plugin {
 				this.ui.decorateFolders();
 			}),
 		);
+	}
 
-		this.register(() => {
-			this.folderSync.killAll();
-		});
+	onunload(): void {
+		this.folderSync.killAll();
 	}
 
 	private async handleVaultReady() {
