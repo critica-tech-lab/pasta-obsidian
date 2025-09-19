@@ -6,36 +6,40 @@ import { join } from "path";
 import { shellEnv } from "shell-env";
 import { backoff } from "./utils/backoff";
 
-export const GIT_FOLDER = ".git";
-export const ETHERSYNC_FOLDER = ".ethersync";
-export const ETHERSYNC_JOIN_CODE_REGEX = /ethersync join ([\w-]+)/;
-
 export type EthersyncFolder = {
 	mode: "share" | "join";
 	path: string;
 	enabled: boolean;
 };
 
-type EditorPosition = {
+export type EthersyncCursorPosition = {
 	line: number;
 	character: number;
 };
 
-type EditorRange = {
-	start: EditorPosition;
-	end: EditorPosition;
+export type EthersyncCursorRange = {
+	start: EthersyncCursorPosition;
+	end: EthersyncCursorPosition;
 };
 
-export type UserCursorMessageParams = {
+export type EthersyncCursorMessage = {
 	userid: string;
 	name: string;
 	uri: string;
-	ranges: Array<EditorRange>;
+	ranges: Array<EthersyncCursorRange>;
 };
 
-type IncomingJSONRPCMessage = {
-	method: "edit" | "cursor";
-	params: UserCursorMessageParams;
+type EthersyncJSONRPCMessage = {
+	method: "cursor";
+	params: EthersyncCursorMessage;
+};
+
+const GIT_FOLDER = ".git";
+const ETHERSYNC_FOLDER = ".ethersync";
+const ETHERSYNC_JOIN_CODE_REGEX = /ethersync join ([\w-]+)/;
+const DEFAULT_CURSOR_RANGE: EthersyncCursorRange = {
+	start: { character: 0, line: 0 },
+	end: { character: 0, line: 0 },
 };
 
 export class EthersyncClient {
@@ -46,46 +50,23 @@ export class EthersyncClient {
 		private socketPath: string,
 		private content: string,
 		private uri: string,
-		private onCursor: (params: UserCursorMessageParams) => void,
+		private onCursor: (params: EthersyncCursorMessage) => void,
 	) {
 		this.socket = new Socket();
-
-		// A potential improvement would be an exponential
-		// backoff reconnection strategy
-		setTimeout(() => this.connect(), 500);
+		setTimeout(() => this.connect(), 1000);
 	}
 
-	connect() {
+	// TODO: handle socket close
+	private connect() {
 		if (this.socket.connecting) {
 			return;
 		}
 
 		this.socket.on("connect", () => {
-			// Initialize cursor at index 0
-			this.updateCursor({
-				start: { character: 0, line: 0 },
-				end: { character: 0, line: 0 },
-			});
+			this.updateCursor(DEFAULT_CURSOR_RANGE);
 		});
 
-		this.socket.on("data", (buffer) => {
-			const data = buffer.toString("utf8");
-			const messages = data.split("\n").map((line) => line.trim());
-
-			messages.forEach((message) => {
-				if (!message) return;
-
-				try {
-					const obj = JSON.parse(message);
-					this.processMessage(obj);
-				} catch (err) {
-					console.error("[EthersyncClient] incoming data error", {
-						err,
-						data,
-					});
-				}
-			});
-		});
+		this.socket.on("data", this.onData.bind(this));
 
 		this.socket.on("error", (e) => {
 			console.error("[EthersyncClient] generic socket error", e);
@@ -94,16 +75,29 @@ export class EthersyncClient {
 		this.socket.connect(this.socketPath);
 	}
 
-	private processMessage(message: IncomingJSONRPCMessage) {
-		switch (message.method) {
-			case "cursor":
-				this.onCursor(message.params);
-				return;
-			case "edit":
-				// TODO: support edit messages
-				return;
-			default:
-				return;
+	private onData(buffer: Buffer) {
+		const data = buffer.toString("utf8");
+
+		const messages = data.split("\n").map((line) => line.trim());
+
+		messages.forEach((message) => {
+			if (!message) return;
+
+			try {
+				const obj = JSON.parse(message);
+				this.processMessage(obj);
+			} catch (err) {
+				console.error("[EthersyncClient] incoming data error", {
+					err,
+					data,
+				});
+			}
+		});
+	}
+
+	private processMessage(message: EthersyncJSONRPCMessage) {
+		if (message.method === "cursor") {
+			this.onCursor(message.params);
 		}
 	}
 
@@ -120,7 +114,7 @@ export class EthersyncClient {
 		});
 	}
 
-	private async updateCursor(range: EditorRange) {
+	public updateCursor(range: EthersyncCursorRange) {
 		const cursorMessage = {
 			jsonrpc: "2.0",
 			id: ++this.currentMessageId,
@@ -131,7 +125,9 @@ export class EthersyncClient {
 			},
 		};
 
-		await this.sendMessage(cursorMessage);
+		this.sendMessage(cursorMessage).catch((err) => {
+			console.error("[EthersyncClient] cursor update failed", err);
+		});
 	}
 }
 

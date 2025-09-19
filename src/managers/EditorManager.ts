@@ -1,9 +1,14 @@
 import { EditorSelection, Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { App, MarkdownView, TFile } from "obsidian";
+import { backoff } from "src/utils/backoff";
 import { getColorForString } from "../color";
 import { cursorsExtension } from "../editor";
-import { EthersyncClient, UserCursorMessageParams } from "../ethersync";
+import {
+	EthersyncClient,
+	EthersyncCursorRange,
+	EthersyncCursorMessage,
+} from "../ethersync";
 import { PastaSyncSettings } from "../settings";
 import { PastaEditorCursor } from "../types/editor";
 import { getEthersyncFolder, getVaultBasePath } from "../vault";
@@ -12,11 +17,6 @@ import { EthersyncManager } from "./EthersyncManager";
 type PastaEditor = {
 	connection: EthersyncClient;
 	userCursors: Map<string, PastaEditorCursor>;
-};
-
-type CursorRange = {
-	start: { line: number; character: number };
-	end: { line: number; character: number };
 };
 
 export class EditorManager {
@@ -44,7 +44,7 @@ export class EditorManager {
 		return this.cursorExtension;
 	}
 
-	handleCursorChange(
+	private handleCursorChange(
 		current: EditorSelection,
 		previous: EditorSelection,
 		view: EditorView,
@@ -83,7 +83,7 @@ export class EditorManager {
 		const startLine = view.state.doc.lineAt(currentRange.from);
 		const endLine = view.state.doc.lineAt(currentRange.to);
 
-		const range: CursorRange = {
+		const range: EthersyncCursorRange = {
 			start: {
 				line: startLine.number - 1,
 				character: currentRange.from - startLine.from,
@@ -94,10 +94,10 @@ export class EditorManager {
 			},
 		};
 
-		this.updateRemoteCursor(editor.connection, range);
+		editor.connection.updateCursor(range);
 	}
 
-	handleUserCursor(message: UserCursorMessageParams) {
+	private handleUserCursor(message: EthersyncCursorMessage) {
 		const view = this.getActiveEditorView();
 		const vaultPath = getVaultBasePath(this.app.vault);
 
@@ -175,20 +175,7 @@ export class EditorManager {
 			return;
 		}
 
-		let retries = 3;
-
-		while (retries > 0) {
-			try {
-				await this.createEditorConnection(file, vaultPath);
-				return;
-			} catch (e) {
-				console.error("error attempting to connect:", e);
-			}
-
-			retries--;
-
-			await new Promise((resolve) => setTimeout(resolve, 3000));
-		}
+		await backoff(() => this.createEditorConnection(file, vaultPath));
 	}
 
 	private async createEditorConnection(file: TFile, vaultPath: string) {
@@ -210,17 +197,6 @@ export class EditorManager {
 			connection,
 			userCursors: new Map(),
 		});
-	}
-
-	private updateRemoteCursor(
-		connection: EthersyncClient,
-		range: CursorRange,
-	) {
-		const client = connection as unknown as {
-			updateCursor: (range: CursorRange) => void;
-		};
-
-		client.updateCursor(range);
 	}
 
 	private getActiveEditorView(): EditorView | null {

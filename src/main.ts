@@ -68,8 +68,12 @@ export default class PastaSyncPlugin extends Plugin {
 			},
 		});
 
-		this.app.workspace.onLayoutReady(() => {
-			void this.handleVaultReady();
+		this.app.workspace.onLayoutReady(async () => {
+			try {
+				await this.handleVaultReady();
+			} catch (error) {
+				console.error("[PastaSyncPlugin] handleVaultReady failed", error);
+			}
 		});
 
 		this.registerEvent(
@@ -79,9 +83,13 @@ export default class PastaSyncPlugin extends Plugin {
 		);
 
 		this.registerEvent(
-			this.app.workspace.on("file-open", (file) => {
+			this.app.workspace.on("file-open", async (file) => {
 				const tFile = file instanceof TFile ? file : undefined;
-				void this.editorManager.handleFileOpen(tFile);
+				try {
+					await this.editorManager.handleFileOpen(tFile);
+				} catch (error) {
+					console.error("[PastaSyncPlugin] handleFileOpen failed", error);
+				}
 			}),
 		);
 
