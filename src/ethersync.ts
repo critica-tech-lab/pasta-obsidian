@@ -4,6 +4,7 @@ import { userInfo } from "os";
 import { Socket } from "net";
 import { join } from "path";
 import { shellEnv } from "shell-env";
+import { backoff } from "./utils/backoff";
 
 export const GIT_FOLDER = ".git";
 export const ETHERSYNC_FOLDER = ".ethersync";
@@ -106,13 +107,21 @@ export class EthersyncClient {
 		}
 	}
 
-	private sendMessage(message: object) {
-		this.socket.write(JSON.stringify(message) + "\r\n", function (err) {
-			if (err) console.error("[EthersyncClient] socket write error", err);
+	private async sendMessage(message: object) {
+		if (!this.socket.writable) {
+			return;
+		}
+
+		await backoff(async () => {
+			console.warn("attempting to write");
+			this.socket.write(JSON.stringify(message) + "\r\n", function (err) {
+				if (err)
+					console.error("[EthersyncClient] socket write error", err);
+			});
 		});
 	}
 
-	updateCursor(range: EditorRange) {
+	private async updateCursor(range: EditorRange) {
 		const cursorMessage = {
 			jsonrpc: "2.0",
 			id: ++this.currentMessageId,
@@ -123,7 +132,7 @@ export class EthersyncClient {
 			},
 		};
 
-		this.sendMessage(cursorMessage);
+		await this.sendMessage(cursorMessage);
 	}
 }
 
