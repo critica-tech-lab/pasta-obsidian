@@ -11,8 +11,13 @@ type StartProcessOptions = {
 	onShareCode?: (code: string) => void;
 };
 
+type EthersyncProcess = {
+	childProcess: ChildProcess;
+	code?: string;
+};
+
 export class EthersyncManager {
-	private processes: Map<string, ChildProcess> = new Map();
+	private processes: Map<string, EthersyncProcess> = new Map();
 
 	constructor(
 		private vaultPath: string | undefined,
@@ -38,6 +43,11 @@ export class EthersyncManager {
 
 	isManagedFolder(id: string) {
 		return this.settings.folders.has(id);
+	}
+
+	isSharingFolder(id: string) {
+		const folder = this.settings.folders.get(id);
+		return folder?.mode === "share";
 	}
 
 	async startFolder(id: string, options: StartProcessOptions = {}) {
@@ -79,8 +89,8 @@ export class EthersyncManager {
 	}
 
 	killAll() {
-		for (const process of this.processes.values()) {
-			process.kill();
+		for (const [id] of this.processes) {
+			this.stopProcess(id);
 		}
 
 		this.processes.clear();
@@ -95,15 +105,34 @@ export class EthersyncManager {
 		this.stopProcess(id);
 
 		if (folder.mode === "share") {
-			this.processes.set(
-				id,
-				await ethersyncShareProcess(absolutePath, options.onShareCode),
-			);
+			const onShareCode = async (code: string) => {
+				const folder = this.settings.folders.get(id);
+
+				if (folder) {
+					this.settings.folders.set(id, {
+						...folder,
+						shareCode: code,
+					});
+				}
+
+				if (options.onShareCode) {
+					options.onShareCode(code);
+				}
+			};
+
+			this.processes.set(id, {
+				childProcess: await ethersyncShareProcess(
+					absolutePath,
+					onShareCode,
+				),
+			});
 		} else {
-			this.processes.set(
-				id,
-				await ethersyncJoinProcess(absolutePath, options.code),
-			);
+			this.processes.set(id, {
+				childProcess: await ethersyncJoinProcess(
+					absolutePath,
+					options.code,
+				),
+			});
 		}
 	}
 
@@ -111,8 +140,7 @@ export class EthersyncManager {
 		const process = this.processes.get(id);
 		if (!process) return;
 
-		process.kill();
+		process.childProcess.kill();
 		this.processes.delete(id);
 	}
-
 }

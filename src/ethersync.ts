@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import { promises as fs } from "fs";
-import { userInfo } from "os";
 import { Socket } from "net";
+import { userInfo } from "os";
 import { join } from "path";
 import { shellEnv } from "shell-env";
 import { backoff } from "./utils/backoff";
@@ -10,6 +10,7 @@ export type EthersyncFolder = {
 	mode: "share" | "join";
 	path: string;
 	enabled: boolean;
+	shareCode?: string;
 };
 
 export type EthersyncCursorPosition = {
@@ -48,7 +49,6 @@ export class EthersyncClient {
 
 	constructor(
 		private socketPath: string,
-		private content: string,
 		private uri: string,
 		private onCursor: (params: EthersyncCursorMessage) => void,
 	) {
@@ -238,9 +238,6 @@ export async function ethersyncShareProcess(
 		const match = data.toString().match(ETHERSYNC_JOIN_CODE_REGEX);
 
 		if (match && onCode) {
-			// Stop listening after first code
-			proc.stdout.off("data", onData);
-
 			onCode(match[1]);
 		}
 	};

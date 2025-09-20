@@ -20,32 +20,36 @@ export class ShareCodeModal extends Modal {
 				txt.setValue(this.code);
 				txt.inputEl.setAttribute("readonly", "true");
 
-				txt.inputEl.addEventListener("focus", () => {
+				txt.inputEl.addEventListener("click", () => {
 					txt.inputEl.select();
 				});
-
-				setTimeout(() => {
-					txt.inputEl.focus();
-					txt.inputEl.select();
-				}, 0);
 			})
 			.addExtraButton((btn) => {
 				btn.setIcon("copy")
 					.setTooltip("Copy to clipboard")
-					.onClick(async () => {
-						await navigator.clipboard.writeText(this.code);
-						new Notice("Copied to clipboard");
-					});
+					.onClick(async () => this.copyToClipboard());
 			});
 
-		new Setting(contentEl).addButton((btn) => {
-			btn.setButtonText("Close")
-				.setCta()
-				.onClick(() => this.close());
-		});
+		new Setting(contentEl)
+			.addButton((btn) => {
+				btn.setButtonText("Close").onClick(() => this.close());
+			})
+			.addButton((btn) => {
+				btn.setButtonText("Copy and close")
+					.setCta()
+					.onClick(async () => {
+						await this.copyToClipboard();
+						this.close();
+					});
+			});
 	}
 
 	onClose() {
 		this.contentEl.empty();
+	}
+
+	private async copyToClipboard() {
+		await navigator.clipboard.writeText(this.code);
+		new Notice("Copied to clipboard");
 	}
 }

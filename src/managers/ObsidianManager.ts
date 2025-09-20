@@ -1,9 +1,9 @@
 import { App, Menu, TAbstractFile, TFolder } from "obsidian";
 import { EthersyncManager } from "../managers/EthersyncManager";
-import { PastaSyncSettings } from "../settings";
 import { JoinFolderModal } from "../modals/JoinFolderModal";
-import { ShareFolderModal } from "../modals/ShareFolderModal";
 import { ShareCodeModal } from "../modals/ShareCodeModal";
+import { ShareFolderModal } from "../modals/ShareFolderModal";
+import { PastaSyncSettings } from "../settings";
 
 export class ObsidianManager {
 	constructor(
@@ -52,22 +52,12 @@ export class ObsidianManager {
 			});
 		}
 
-		if (this.processManager.isManagedFolder(file.path)) {
-			if (this.processManager.hasActiveProcess(file.path)) {
-				menu.addItem((item) => {
-					item.setTitle("Pasta: Disable folder").onClick(async () => {
-						await this.processManager.disableFolder(file.path);
-						this.decorateFolders();
-					});
+		if (this.processManager.isSharingFolder(file.path)) {
+			menu.addItem((item) => {
+				item.setTitle("Pasta: Share code").onClick(async () => {
+					this.openShareCodeModal(file.path);
 				});
-			} else {
-				menu.addItem((item) => {
-					item.setTitle("Pasta: Enable folder").onClick(async () => {
-						await this.processManager.enableFolder(file.path);
-						this.decorateFolders();
-					});
-				});
-			}
+			});
 		} else if (file instanceof TFolder && file.parent?.isRoot()) {
 			menu.addItem((item) => {
 				item.setTitle("Pasta: Share folder").onClick(async () => {
@@ -107,6 +97,16 @@ export class ObsidianManager {
 			},
 			ignoreFolders,
 		).open();
+	}
+
+	openShareCodeModal(id: string) {
+		const folder = this.settings.folders.get(id);
+
+		if (!folder || !folder.shareCode) {
+			return;
+		}
+
+		new ShareCodeModal(this.app, folder.shareCode).open();
 	}
 
 	private async addShareFolder(path: string) {
