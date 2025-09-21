@@ -72,7 +72,10 @@ export default class PastaSyncPlugin extends Plugin {
 			try {
 				await this.handleVaultReady();
 			} catch (error) {
-				console.error("[PastaSyncPlugin] handleVaultReady failed", error);
+				console.error(
+					"[PastaSyncPlugin] handleVaultReady failed",
+					error,
+				);
 			}
 		});
 
@@ -88,8 +91,17 @@ export default class PastaSyncPlugin extends Plugin {
 				try {
 					await this.editorManager.handleFileOpen(tFile);
 				} catch (error) {
-					console.error("[PastaSyncPlugin] handleFileOpen failed", error);
+					console.error(
+						"[PastaSyncPlugin] handleFileOpen failed",
+						error,
+					);
 				}
+			}),
+		);
+
+		this.registerEvent(
+			this.app.workspace.on("quit", async () => {
+				this.processManager.killAll();
 			}),
 		);
 
@@ -110,10 +122,6 @@ export default class PastaSyncPlugin extends Plugin {
 		setTimeout(() => {
 			this.ui.decorateFolders();
 		}, 100);
-	}
-
-	private handleAppQuit() {
-		this.processManager.killAll();
 	}
 
 	async openSettings() {

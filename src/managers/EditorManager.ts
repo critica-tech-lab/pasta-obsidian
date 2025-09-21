@@ -179,7 +179,6 @@ export class EditorManager {
 	}
 
 	private async createEditorConnection(file: TFile, vaultPath: string) {
-		const content = await this.app.vault.read(file);
 		const ethersyncFolder = await getEthersyncFolder(file, this.app.vault);
 
 		if (!ethersyncFolder) {
@@ -188,7 +187,6 @@ export class EditorManager {
 
 		const connection = new EthersyncClient(
 			[ethersyncFolder, "socket"].join("/"),
-			content,
 			"file://" + [vaultPath, file.path].join("/"),
 			this.handleUserCursor.bind(this),
 		);
