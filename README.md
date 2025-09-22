@@ -1,6 +1,6 @@
 # Pasta for Obsidian
 
-https://github.com/user-attachments/assets/f098bbb1-2f6b-4bfb-a1f5-af0234995df4
+[Demo](https://github.com/user-attachments/assets/f098bbb1-2f6b-4bfb-a1f5-af0234995df4)
 
 Pasta is a collaborative note-taking and editing app built on top of Ethersync.
 
