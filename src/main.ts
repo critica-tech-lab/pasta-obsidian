@@ -1,4 +1,4 @@
-import { Plugin, TFile } from "obsidian";
+import { Plugin, TFile, TFolder } from "obsidian";
 import { EthersyncManager } from "./managers/EthersyncManager";
 import { EditorManager } from "./managers/EditorManager";
 import { ObsidianManager } from "./managers/ObsidianManager";
@@ -78,6 +78,20 @@ export default class PastaSyncPlugin extends Plugin {
 				);
 			}
 		});
+
+		this.registerEvent(
+			this.app.vault.on("create", (folder) => {
+				this.ui.decorateFolders();
+			}),
+		);
+
+		this.registerEvent(
+			this.app.vault.on("delete", (folder) => {
+				if (folder instanceof TFolder) {
+					this.removeFolder(folder.path);
+				}
+			}),
+		);
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {

@@ -1,10 +1,11 @@
 import { ChildProcess } from "child_process";
+import { Notice } from "obsidian";
 import {
 	EthersyncFolder,
 	ethersyncJoinProcess,
 	ethersyncShareProcess,
 } from "../ethersync";
-import { PastaSyncSettings } from "../settings";
+import { getEthersyncBinary, PastaSyncSettings } from "../settings";
 
 type StartProcessOptions = {
 	code?: string;
@@ -47,14 +48,14 @@ export class EthersyncManager {
 
 	isSharingFolder(id: string) {
 		const folder = this.settings.folders.get(id);
-		return folder?.mode === "share";
+		return folder ? folder.mode === "share" && folder.enabled : false;
 	}
 
 	async startFolder(id: string, options: StartProcessOptions = {}) {
 		const folder = this.settings.folders.get(id);
-		if (!folder || !folder.enabled) return;
 
-		if (!this.vaultPath) return;
+		if (!this.vaultPath || !folder || !folder.enabled) return;
+
 		const absolutePath = [this.vaultPath, folder.path].join("/");
 
 		await this.startProcess(id, folder, absolutePath, options);
@@ -104,6 +105,13 @@ export class EthersyncManager {
 	) {
 		this.stopProcess(id);
 
+		const binary = getEthersyncBinary(this.settings);
+
+		if (!binary) {
+			console.error("ethersync not found");
+			return;
+		}
+
 		if (folder.mode === "share") {
 			const onShareCode = async (code: string) => {
 				const folder = this.settings.folders.get(id);
@@ -120,19 +128,27 @@ export class EthersyncManager {
 				}
 			};
 
-			this.processes.set(id, {
-				childProcess: await ethersyncShareProcess(
-					absolutePath,
-					onShareCode,
-				),
-			});
+			try {
+				this.processes.set(id, {
+					childProcess: await ethersyncShareProcess(absolutePath, {
+						binary,
+						onShareCode,
+					}),
+				});
+			} catch (error) {
+				this.handleBinaryError(error);
+			}
 		} else {
-			this.processes.set(id, {
-				childProcess: await ethersyncJoinProcess(
-					absolutePath,
-					options.code,
-				),
-			});
+			try {
+				this.processes.set(id, {
+					childProcess: await ethersyncJoinProcess(absolutePath, {
+						binary,
+						code: options.code,
+					}),
+				});
+			} catch (error) {
+				this.handleBinaryError(error);
+			}
 		}
 	}
 
@@ -142,5 +158,14 @@ export class EthersyncManager {
 
 		process.childProcess.kill();
 		this.processes.delete(id);
+	}
+
+	private handleBinaryError(error: unknown) {
+		const message =
+			error instanceof Error
+				? error.message
+				: String(error ?? "Unknown error");
+		console.error("[EthersyncManager] Unable to start ethersync", error);
+		new Notice(`Failed to launch ethersync: ${message}`);
 	}
 }

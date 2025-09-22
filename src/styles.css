@@ -69,3 +69,11 @@ If your plugin does not need CSS, delete this file.
 	background-color: var(--color-accent);
 	color: white !important;
 }
+
+.pasta-settings-advanced {
+	margin-top: 50px;
+}
+
+.pasta-settings-binary-not-found .setting-item-description {
+	color: var(--color-warning);
+}

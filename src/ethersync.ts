@@ -35,8 +35,19 @@ type EthersyncJSONRPCMessage = {
 	params: EthersyncCursorMessage;
 };
 
+type JoinProcessOptions = {
+	code?: string;
+	binary: string;
+};
+
+type ShareProcessOptions = {
+	onShareCode?: (code: string) => void;
+	binary: string;
+};
+
 const GIT_FOLDER = ".git";
 const ETHERSYNC_FOLDER = ".ethersync";
+export const ETHERSYNC_BINARY_NAME = "ethersync";
 const ETHERSYNC_JOIN_CODE_REGEX = /ethersync join ([\w-]+)/;
 const DEFAULT_CURSOR_RANGE: EthersyncCursorRange = {
 	start: { character: 0, line: 0 },
@@ -192,7 +203,10 @@ export async function hasEthersyncFolder(path: string) {
 	}
 }
 
-export async function ethersyncJoinProcess(path: string, code?: string) {
+export async function ethersyncJoinProcess(
+	path: string,
+	options: JoinProcessOptions,
+) {
 	if (!(await hasEthersyncFolder(path))) {
 		await createEthersyncFolder(path);
 	}
@@ -203,11 +217,11 @@ export async function ethersyncJoinProcess(path: string, code?: string) {
 
 	const args = ["join", "--directory", path];
 
-	if (code) {
-		args.push(code);
+	if (options.code) {
+		args.push(options.code);
 	}
 
-	const proc = spawn("ethersync", args, {
+	const proc = spawn(options.binary, args, {
 		detached: false,
 		shell: false,
 		env: await shellEnv(),
@@ -218,7 +232,7 @@ export async function ethersyncJoinProcess(path: string, code?: string) {
 
 export async function ethersyncShareProcess(
 	path: string,
-	onCode?: (code: string) => void,
+	options: ShareProcessOptions,
 ) {
 	if (!(await hasEthersyncFolder(path))) {
 		await createEthersyncFolder(path);
@@ -228,7 +242,7 @@ export async function ethersyncShareProcess(
 		await createGitFolder(path);
 	}
 
-	const proc = spawn("ethersync", ["share", "--directory", path], {
+	const proc = spawn(options.binary, ["share", "--directory", path], {
 		detached: false,
 		shell: false,
 		env: await shellEnv(),
@@ -237,8 +251,8 @@ export async function ethersyncShareProcess(
 	const onData = (data: ArrayBuffer) => {
 		const match = data.toString().match(ETHERSYNC_JOIN_CODE_REGEX);
 
-		if (match && onCode) {
-			onCode(match[1]);
+		if (match && options.onShareCode) {
+			options.onShareCode(match[1]);
 		}
 	};
 

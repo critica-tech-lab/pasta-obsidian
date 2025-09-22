@@ -31,7 +31,8 @@ export class ObsidianManager {
 			if (folder) {
 				if (!icon) {
 					icon = document.createElement("div");
-					icon.innerHTML = "P";
+					icon.innerHTML =
+						(folder.mode === "share" ? "↑" : "↓") + " P";
 					item.appendChild(icon);
 				}
 
@@ -58,7 +59,11 @@ export class ObsidianManager {
 					this.openShareCodeModal(file.path);
 				});
 			});
-		} else if (file instanceof TFolder && file.parent?.isRoot()) {
+		} else if (
+			file instanceof TFolder &&
+			file.parent?.isRoot() &&
+			!this.processManager.isManagedFolder(file.path)
+		) {
 			menu.addItem((item) => {
 				item.setTitle("Pasta: Share folder").onClick(async () => {
 					await this.addShareFolder(file.path);

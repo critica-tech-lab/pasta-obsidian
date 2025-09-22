@@ -1,6 +1,6 @@
 {
 	"name": "pasta-obsidian",
-	"version": "0.1",
+	"version": "0.0.1",
 	"description": "Ethersync-compatible plugin for Obsidian",
 	"main": "dist/main.js",
 	"scripts": {
@@ -9,8 +9,6 @@
 		"test": "vitest run",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
-	"keywords": [],
-	"author": "",
 	"license": "AGPL-3.0-or-later",
 	"devDependencies": {
 		"@types/node": "^16.11.6",

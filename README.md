@@ -1,3 +1,24 @@
-# pasta-obsidian
+# Pasta for Obsidian
 
-Ethersync-compatible plugin for Obsidian
+Pasta is a collaborative note-taking and editing app built on top of Ethersync.
+
+Ethersync provides the core engine for real-time collaborative editing of local text files. With it, multiple people can edit the same file simultaneously, making Pasta useful for activities such as shared notes or lightweight document editing.
+
+## Caution
+
+Pasta is currently in _Alpha_. This means:
+
+- Handle your data with care. Documents may be lost or corrupted.
+- Bugs are expected. Features may break or behave unpredictably.
+- Breaking changes are likely. We’re iterating quickly, so storage formats, commands, or APIs may change without notice.
+
+If you choose to use Pasta at this stage, please do so only with **non-critical** data.
+
+## Feedback
+
+If you find a bug, please [open an issue](https://github.com/critica-lab/pasta-obsidian).
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0.
+See the [LICENSE](LICENSE.md) file for details.
