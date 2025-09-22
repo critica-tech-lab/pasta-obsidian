@@ -2,7 +2,7 @@
 
 [Demo](https://github.com/user-attachments/assets/f098bbb1-2f6b-4bfb-a1f5-af0234995df4)
 
-Pasta is a collaborative note-taking and editing app built on top of Ethersync.
+Pasta is a collaborative note-taking and editing app built on top of [Ethersync](https://github.com/ethersync/ethersync).
 
 Ethersync provides the core engine for real-time collaborative editing of local text files. With it, multiple people can edit the same file simultaneously, making Pasta useful for activities such as shared notes or lightweight document editing.
 
