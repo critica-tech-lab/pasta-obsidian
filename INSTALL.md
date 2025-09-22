@@ -26,8 +26,8 @@
 
 ## Install Ethersync binary
 
-[!IMPORTANT]
-Note: This will install a binary on your Obsidian Vault `(.ethersync/ethersync)`. If you prefer to use a system available binary, provide a custom _ethersync_ binary location path
+> [!IMPORTANT]
+> Note: This will install a binary on your Obsidian Vault `(.ethersync/ethersync)`. If you prefer to use a system available binary, provide a custom _ethersync_ binary location path
 
 - On "Pasta" settings, click on "Open Advanced settings"
 - For _Ethersync location_, change to "Custom"
