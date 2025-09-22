@@ -1,6 +1,6 @@
 # Pasta for Obsidian
 
-![Join a folder](docs/videos/join-folder.gif)
+[Demo](https://github.com/user-attachments/assets/f098bbb1-2f6b-4bfb-a1f5-af0234995df4)
 
 Pasta is a collaborative note-taking and editing app built on top of Ethersync.
 
@@ -22,7 +22,7 @@ Check out the step-by-step instructions in our [INSTALL](INSTALL.md) guide to ge
 
 ## Feedback
 
-If you find a bug, please [open an issue](https://github.com/critica-tech-lab/pasta-obsidian/issues)
+If you find a bug, please [open an issue](https://github.com/critica-tech-lab/pasta-obsidian/issues) describing your use case and a detailed explanation of the issue.
 
 ## License
 
