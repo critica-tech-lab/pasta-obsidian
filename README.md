@@ -14,6 +14,10 @@ Pasta is currently in _Alpha_. This means:
 
 If you choose to use Pasta at this stage, please do so only with **non-critical** data.
 
+## Installation
+
+Check out the step-by-step instructions in our [INSTALL](INSTALL.md) guide to get started.
+
 ## Feedback
 
 If you find a bug, please [open an issue](https://github.com/critica-tech-lab/pasta-obsidian/issues)
