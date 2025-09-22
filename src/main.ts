@@ -7,7 +7,7 @@ import {
 	PastaSyncSettings,
 	PASTA_SYNC_DEFAULT_SETTINGS,
 } from "./settings";
-import { getVaultBasePath } from "./vault";
+import { getVaultBasePath } from "./utils/vault";
 
 export default class PastaSyncPlugin extends Plugin {
 	public settings: PastaSyncSettings = PASTA_SYNC_DEFAULT_SETTINGS;

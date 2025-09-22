@@ -2,16 +2,16 @@ import { EditorSelection, Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { App, MarkdownView, TFile } from "obsidian";
 import { backoff } from "src/utils/backoff";
-import { getColorForString } from "../color";
+import { getColorForString } from "../utils/color";
 import { cursorsExtension } from "../editor";
 import {
 	EthersyncClient,
 	EthersyncCursorRange,
 	EthersyncCursorMessage,
-} from "../ethersync";
+} from "../utils/ethersync";
 import { PastaSyncSettings } from "../settings";
 import { PastaEditorCursor } from "../types/editor";
-import { getEthersyncFolder, getVaultBasePath } from "../vault";
+import { getEthersyncFolder, getVaultBasePath } from "../utils/vault";
 import { EthersyncManager } from "./EthersyncManager";
 
 type PastaEditor = {

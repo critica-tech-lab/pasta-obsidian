@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import { EthersyncFolder, ETHERSYNC_BINARY_NAME } from "./ethersync";
+import { EthersyncFolder, ETHERSYNC_BINARY_NAME } from "./utils/ethersync";
 import PastaSyncPlugin from "./main";
 import { AdvancedSettingsModal } from "./modals/AdvancedSettingsModal";
 import { ShareCodeModal } from "./modals/ShareCodeModal";

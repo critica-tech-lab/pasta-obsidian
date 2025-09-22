@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 import { shellEnv } from "shell-env";
-import { createEthersyncFolder } from "../ethersync";
+import { createEthersyncFolder } from "./ethersync";
 
 const DOWNLOADED_FOLDER = ".ethersync";
 const DEFAULT_BINARY_COMMAND = "ethersync";

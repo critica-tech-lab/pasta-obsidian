@@ -8,7 +8,7 @@ import {
 	WidgetType,
 } from "@codemirror/view";
 import { PastaEditorCursor } from "./types/editor";
-import { getTextColorForBackground, hexToRgba } from "./color";
+import { getTextColorForBackground, hexToRgba } from "./utils/color";
 
 export type CursorOptions = {
 	onCursorChange: (

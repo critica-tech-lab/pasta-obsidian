@@ -9,7 +9,7 @@ import {
 import type PastaSyncPlugin from "../main";
 import type { EthersyncBinaryLocation } from "../settings";
 import { downloadLatestEthersyncBinary } from "../utils/binary";
-import { getVaultBasePath } from "../vault";
+import { getVaultBasePath } from "../utils/vault";
 
 export class AdvancedSettingsModal extends Modal {
 	private readonly plugin: PastaSyncPlugin;

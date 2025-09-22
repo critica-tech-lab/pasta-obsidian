@@ -4,7 +4,7 @@ import {
 	EthersyncFolder,
 	ethersyncJoinProcess,
 	ethersyncShareProcess,
-} from "../ethersync";
+} from "../utils/ethersync";
 import { getEthersyncBinary, PastaSyncSettings } from "../settings";
 
 type StartProcessOptions = {

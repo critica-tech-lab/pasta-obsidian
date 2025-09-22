@@ -4,7 +4,7 @@ import { Socket } from "net";
 import { userInfo } from "os";
 import { join } from "path";
 import { shellEnv } from "shell-env";
-import { backoff } from "./utils/backoff";
+import { backoff } from "./backoff";
 
 export type EthersyncFolder = {
 	mode: "share" | "join";
