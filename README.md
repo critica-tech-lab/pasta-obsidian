@@ -1,5 +1,7 @@
 # Pasta for Obsidian
 
+[Video: Join a folder](https://github.com/critica-tech-lab/pasta-obsidian/raw/refs/heads/main/docs/videos/join-folder.mp4)
+
 Pasta is a collaborative note-taking and editing app built on top of Ethersync.
 
 Ethersync provides the core engine for real-time collaborative editing of local text files. With it, multiple people can edit the same file simultaneously, making Pasta useful for activities such as shared notes or lightweight document editing.
