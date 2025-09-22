@@ -1,0 +1,10 @@
+{
+	"id": "pasta",
+	"name": "Pasta",
+	"version": "0.0.1",
+	"minAppVersion": "0.15.0",
+	"description": "Decentralized real-time collaboration for all",
+	"author": "Pasta",
+	"authorUrl": "https://github.com/critica-tech-lab/pasta-obsidian",
+	"isDesktopOnly": true
+}
