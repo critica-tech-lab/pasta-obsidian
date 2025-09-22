@@ -16,9 +16,9 @@ If you choose to use Pasta at this stage, please do so only with **non-critical*
 
 ## Feedback
 
-If you find a bug, please [open an issue](https://github.com/critica-lab/pasta-obsidian).
+If you find a bug, please [open an issue](https://github.com/critica-tech-lab/pasta-obsidian/issues)
 
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0.
-See the [LICENSE](LICENSE.md) file for details.
+See the [LICENSE](LICENSE) file for details.
