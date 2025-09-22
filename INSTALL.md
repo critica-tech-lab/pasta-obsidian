@@ -1,6 +1,6 @@
 # Installation
 
-[Installation video](https://github.com/critica-tech-lab/pasta-obsidian/raw/refs/heads/main/docs/videos/macos-installation.mp4)
+![Join a folder demo](docs/videos/join-folder.gif)
 
 ## Activate Community Plugins
 
