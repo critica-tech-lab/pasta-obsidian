@@ -1,6 +1,6 @@
 # Installation
 
-![Join a folder demo](docs/videos/join-folder.gif)
+![Join a folder demo](docs/videos/installation.gif)
 
 ## Activate Community Plugins
 
