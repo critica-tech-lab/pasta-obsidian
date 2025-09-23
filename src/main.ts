@@ -86,6 +86,20 @@ export default class PastaSyncPlugin extends Plugin {
 		);
 
 		this.registerEvent(
+			this.app.vault.on("rename", async (folder, oldPath) => {
+				if (
+					folder instanceof TFolder &&
+					this.processManager.isManagedFolder(oldPath)
+				) {
+					await this.processManager.renameFolder(
+						oldPath,
+						folder.path,
+					);
+				}
+			}),
+		);
+
+		this.registerEvent(
 			this.app.vault.on("delete", (folder) => {
 				if (folder instanceof TFolder) {
 					this.removeFolder(folder.path);

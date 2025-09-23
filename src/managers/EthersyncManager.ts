@@ -80,6 +80,31 @@ export class EthersyncManager {
 		this.stopProcess(id);
 	}
 
+	async renameFolder(id: string, path: string) {
+		const folder = this.settings.folders.get(id);
+
+		if (!folder) {
+			return;
+		}
+
+		// Terminate existing process
+		this.stopProcess(id);
+
+		// Add a new folder entry
+		this.settings.folders.set(path, {
+			...folder,
+			path,
+		});
+
+		// Remove old folder entry
+		this.settings.folders.delete(id);
+
+		await this.persistSettings();
+
+		// Start the new process
+		await this.startFolder(path);
+	}
+
 	async removeFolder(id: string) {
 		if (!this.settings.folders.has(id)) return;
 
@@ -114,14 +139,10 @@ export class EthersyncManager {
 
 		if (folder.mode === "share") {
 			const onShareCode = async (code: string) => {
-				const folder = this.settings.folders.get(id);
-
-				if (folder) {
-					this.settings.folders.set(id, {
-						...folder,
-						shareCode: code,
-					});
-				}
+				this.settings.folders.set(id, {
+					...folder,
+					shareCode: code,
+				});
 
 				if (options.onShareCode) {
 					options.onShareCode(code);
@@ -149,6 +170,17 @@ export class EthersyncManager {
 			} catch (error) {
 				this.handleBinaryError(error);
 			}
+		}
+
+		const process = this.processes.get(id);
+
+		if (process) {
+			process.childProcess.on("exit", async (code) => {
+				if (code && code > 0) {
+					console.debug("process crashed, restarting...");
+					await this.startProcess(id, folder, absolutePath, options);
+				}
+			});
 		}
 	}
 

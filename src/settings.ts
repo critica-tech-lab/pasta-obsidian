@@ -63,15 +63,6 @@ export class PastaSettingsTab extends PluginSettingTab {
 			for (const [id, folder] of folders) {
 				const setting = new Setting(containerEl).setName(folder.path);
 
-				setting.addExtraButton((btn) => {
-					btn.setIcon("trash-2");
-					btn.setTooltip("Remove");
-					btn.onClick(async () => {
-						await this.plugin.removeFolder(folder.path);
-						this.display();
-					});
-				});
-
 				if (folder.mode === "share") {
 					setting.addExtraButton((btn) => {
 						btn.setIcon("share")
@@ -88,6 +79,15 @@ export class PastaSettingsTab extends PluginSettingTab {
 							});
 					});
 				}
+
+				setting.addExtraButton((btn) => {
+					btn.setIcon("trash-2");
+					btn.setTooltip("Remove");
+					btn.onClick(async () => {
+						await this.plugin.removeFolder(folder.path);
+						this.display();
+					});
+				});
 
 				setting.addToggle((toggle) =>
 					toggle

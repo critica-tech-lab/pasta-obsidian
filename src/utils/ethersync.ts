@@ -227,6 +227,14 @@ export async function ethersyncJoinProcess(
 		env: await shellEnv(),
 	});
 
+	proc.stdout.on("data", (data: ArrayBuffer) => {
+		console.debug("ethersync join >", data.toString());
+	});
+
+	proc.stderr.on("data", (data: ArrayBuffer) => {
+		console.error("ethersync join (error) >", data.toString());
+	});
+
 	return proc;
 }
 
@@ -249,6 +257,8 @@ export async function ethersyncShareProcess(
 	});
 
 	const onData = (data: ArrayBuffer) => {
+		console.debug("ethersync share >", data.toString());
+
 		const match = data.toString().match(ETHERSYNC_JOIN_CODE_REGEX);
 
 		if (match && options.onShareCode) {
@@ -257,6 +267,10 @@ export async function ethersyncShareProcess(
 	};
 
 	proc.stdout.on("data", onData);
+
+	proc.stderr.on("data", (data: ArrayBuffer) => {
+		console.error("ethersync share (error) >", data.toString());
+	});
 
 	return proc;
 }
