@@ -1,11 +1,12 @@
 import { ChildProcess } from "child_process";
 import { Notice } from "obsidian";
+import { PastaSettings } from "../settings";
 import {
 	EthersyncFolder,
 	ethersyncJoinProcess,
 	ethersyncShareProcess,
+	getEthersyncBinary,
 } from "../utils/ethersync";
-import { getEthersyncBinary, PastaSettings } from "../settings";
 
 type StartProcessOptions = {
 	code?: string;

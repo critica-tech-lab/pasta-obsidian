@@ -1,15 +1,15 @@
 import { Plugin, TFile, TFolder } from "obsidian";
-import { EthersyncManager } from "./managers/EthersyncManager";
 import { EditorManager } from "./managers/EditorManager";
+import { EthersyncManager } from "./managers/EthersyncManager";
 import { ObsidianManager } from "./managers/ObsidianManager";
 import {
-	PastaSettingsTab,
-	PastaSettings,
-	PASTA_SYNC_DEFAULT_SETTINGS,
 	PastaExperiment,
+	PastaSettings,
+	PastaSettingsTab,
+	PASTA_SYNC_DEFAULT_SETTINGS,
 } from "./settings";
-import { getVaultBasePath } from "./utils/vault";
 import { isExperimentEnabled } from "./utils/experiments";
+import { getVaultBasePath } from "./utils/vault";
 
 export default class PastaSyncPlugin extends Plugin {
 	public settings: PastaSettings = PASTA_SYNC_DEFAULT_SETTINGS;

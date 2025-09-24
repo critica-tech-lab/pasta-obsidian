@@ -4,6 +4,7 @@ import { Socket } from "net";
 import { userInfo } from "os";
 import { join } from "path";
 import { shellEnv } from "shell-env";
+import { PastaSettings } from "src/settings";
 import { backoff } from "./backoff";
 
 export type EthersyncFolder = {
@@ -201,6 +202,14 @@ export async function hasEthersyncFolder(path: string) {
 	} catch (e) {
 		return false;
 	}
+}
+
+export function getEthersyncBinary(settings: PastaSettings) {
+	if (settings.ethersyncBinaryLocation === "auto") {
+		return ETHERSYNC_BINARY_NAME;
+	}
+
+	return settings.ethersyncCustomBinaryPath;
 }
 
 export async function ethersyncJoinProcess(

@@ -6,9 +6,14 @@ import {
 	Setting,
 	TextComponent,
 } from "obsidian";
+import { isExperimentEnabled } from "src/utils/experiments";
 import type PastaSyncPlugin from "../main";
-import type { EthersyncBinaryLocation } from "../settings";
-import { downloadLatestEthersyncBinary } from "../utils/binary";
+import { EthersyncBinaryLocation, PastaExperiment } from "../settings";
+import {
+	downloadLatestEthersyncBinary,
+	ensureBinaryResponds,
+} from "../utils/binary";
+import { getEthersyncBinary } from "../utils/ethersync";
 import { getVaultBasePath } from "../utils/vault";
 
 export class AdvancedSettingsModal extends Modal {
@@ -16,7 +21,7 @@ export class AdvancedSettingsModal extends Modal {
 	private readonly vaultPath?: string;
 	private customPathSetting?: Setting;
 	private downloadSetting?: Setting;
-	private downloadButton?: ButtonComponent;
+	private versionSetting?: Setting;
 
 	constructor(app: App, plugin: PastaSyncPlugin) {
 		super(app);
@@ -25,21 +30,67 @@ export class AdvancedSettingsModal extends Modal {
 	}
 
 	onOpen() {
-		const { contentEl, titleEl } = this;
+		this.contentEl.empty();
 
-		titleEl.setText("Advanced settings");
-		contentEl.empty();
-
-		this.renderEthersyncSection(contentEl);
+		this.titleEl.setText("Advanced settings");
+		this.renderEthersyncSection(this.contentEl);
 	}
 
 	onClose() {
 		this.contentEl.empty();
 	}
 
-	private renderEthersyncSection(containerEl: HTMLElement) {
+	private async updateEthersyncVersion() {
+		if (this.versionSetting) {
+			this.versionSetting.setDesc(
+				(await this.getEthersyncVersion()) ?? "Not Found",
+			);
+		}
+	}
+
+	private async renderEthersyncSection(containerEl: HTMLElement) {
+		const { settings } = this.plugin;
+
+		new Setting(containerEl).setName("Experiments").setHeading();
+
+		new Setting(containerEl)
+			.setName("Cursors")
+			.setDesc(
+				"Track and display user cursors when editing (requires restart)",
+			)
+			.addToggle((toggle) => {
+				toggle
+					.setValue(
+						isExperimentEnabled(
+							this.plugin.settings,
+							PastaExperiment.Cursors,
+						),
+					)
+					.onChange(async (value) => {
+						settings.experiments.set(
+							PastaExperiment.Cursors,
+							value,
+						);
+						await this.plugin.saveSettings();
+					});
+			});
+
+		new Setting(containerEl).setName("Ethersync").setHeading();
+
+		this.versionSetting = new Setting(containerEl)
+			.setName("Version")
+			.addExtraButton((btn) => {
+				btn.setIcon("rotate-ccw")
+					.setTooltip("Refresh")
+					.onClick(async () => {
+						await this.updateEthersyncVersion();
+					});
+			});
+
+		await this.updateEthersyncVersion();
+
 		const locationSetting = new Setting(containerEl)
-			.setName("Ethersync location")
+			.setName("Binary mode")
 			.setDesc("Choose how Pasta locates the `ethersync` executable.");
 
 		locationSetting.addDropdown((dropdown) => {
@@ -52,6 +103,7 @@ export class AdvancedSettingsModal extends Modal {
 				}
 
 				await this.updateBinaryLocation(value);
+				await this.updateEthersyncVersion();
 
 				this.updateDownloadUi();
 			});
@@ -60,7 +112,7 @@ export class AdvancedSettingsModal extends Modal {
 		let customLocationText: TextComponent | undefined;
 
 		this.customPathSetting = new Setting(containerEl)
-			.setName("Custom Ethersync location")
+			.setName("Custom binary location")
 			.setDesc("Full path to an `ethersync` executable.")
 			.addText((text) => {
 				customLocationText = text;
@@ -72,24 +124,24 @@ export class AdvancedSettingsModal extends Modal {
 					.onChange(async (value) => {
 						this.plugin.settings.ethersyncCustomBinaryPath =
 							value.trim();
+
 						await this.plugin.saveSettings();
+
+						await this.updateEthersyncVersion();
 					});
 			});
 
 		this.downloadSetting = new Setting(containerEl).setName(
-			"Download Ethersync",
+			"Download Ethersync 0.7.0",
 		);
+
 		this.downloadSetting.addButton((button) => {
-			button.setButtonText("Download v0.7.0");
+			button.setButtonText("Download & Use");
 			button.setCta();
 			button.onClick(async () => {
 				await this.handleDownload(button, customLocationText);
 			});
-			this.downloadButton = button;
-			this.updateDownloadUi();
 		});
-
-		this.updateDownloadUi();
 	}
 
 	private async updateBinaryLocation(value: EthersyncBinaryLocation) {
@@ -149,6 +201,21 @@ export class AdvancedSettingsModal extends Modal {
 
 	private isBinaryLocation(value: string): value is EthersyncBinaryLocation {
 		return value === "auto" || value === "custom";
+	}
+
+	private async getEthersyncVersion() {
+		const binary = getEthersyncBinary(this.plugin.settings);
+
+		if (!binary) {
+			return;
+		}
+
+		try {
+			const version = await ensureBinaryResponds(binary);
+			return version;
+		} catch (err) {
+			console.error("Failed to detect ethersync version", err);
+		}
 	}
 
 	private updateDownloadUi() {
