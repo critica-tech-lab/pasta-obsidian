@@ -5,7 +5,7 @@ import {
 	ethersyncJoinProcess,
 	ethersyncShareProcess,
 } from "../utils/ethersync";
-import { getEthersyncBinary, PastaSyncSettings } from "../settings";
+import { getEthersyncBinary, PastaSettings } from "../settings";
 
 type StartProcessOptions = {
 	code?: string;
@@ -22,7 +22,7 @@ export class EthersyncManager {
 
 	constructor(
 		private vaultPath: string | undefined,
-		private settings: PastaSyncSettings,
+		private settings: PastaSettings,
 		private persistSettings: () => Promise<void>,
 	) {}
 

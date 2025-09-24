@@ -4,13 +4,15 @@ import { EditorManager } from "./managers/EditorManager";
 import { ObsidianManager } from "./managers/ObsidianManager";
 import {
 	PastaSettingsTab,
-	PastaSyncSettings,
+	PastaSettings,
 	PASTA_SYNC_DEFAULT_SETTINGS,
+	PastaExperiment,
 } from "./settings";
 import { getVaultBasePath } from "./utils/vault";
+import { isExperimentEnabled } from "./utils/experiments";
 
 export default class PastaSyncPlugin extends Plugin {
-	public settings: PastaSyncSettings = PASTA_SYNC_DEFAULT_SETTINGS;
+	public settings: PastaSettings = PASTA_SYNC_DEFAULT_SETTINGS;
 	private processManager!: EthersyncManager;
 	private editorManager!: EditorManager;
 	private ui!: ObsidianManager;
@@ -42,7 +44,9 @@ export default class PastaSyncPlugin extends Plugin {
 			this.openSettings.bind(this),
 		);
 
-		this.registerEditorExtension(this.editorManager.extension);
+		if (isExperimentEnabled(this.settings, PastaExperiment.Cursors)) {
+			this.registerEditorExtension(this.editorManager.extension);
+		}
 
 		this.addCommand({
 			id: "pasta-join-folder",
@@ -186,8 +190,11 @@ export default class PastaSyncPlugin extends Plugin {
 
 		this.settings = Object.assign({}, PASTA_SYNC_DEFAULT_SETTINGS, {
 			...data,
+			experiments: Array.isArray(data?.experiments)
+				? new Map(data.experiments)
+				: new Map(),
 			folders: Array.isArray(data?.folders)
-				? new Map(data.folders as [string, unknown][])
+				? new Map(data.folders)
 				: new Map(),
 		});
 	}
@@ -196,6 +203,7 @@ export default class PastaSyncPlugin extends Plugin {
 		const data = {
 			...this.settings,
 			folders: Array.from(this.settings.folders.entries()),
+			experiments: Array.from(this.settings.experiments.entries()),
 		};
 
 		await this.saveData(data);

@@ -3,12 +3,12 @@ import { EthersyncManager } from "../managers/EthersyncManager";
 import { JoinFolderModal } from "../modals/JoinFolderModal";
 import { ShareCodeModal } from "../modals/ShareCodeModal";
 import { ShareFolderModal } from "../modals/ShareFolderModal";
-import { PastaSyncSettings } from "../settings";
+import { PastaSettings } from "../settings";
 
 export class ObsidianManager {
 	constructor(
 		private app: App,
-		private settings: PastaSyncSettings,
+		private settings: PastaSettings,
 		private processManager: EthersyncManager,
 		private persistSettings: () => Promise<void>,
 		private openSettings: () => Promise<void>,

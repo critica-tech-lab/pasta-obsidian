@@ -7,19 +7,25 @@ import { ensureBinaryResponds } from "./utils/binary";
 
 export type EthersyncBinaryLocation = "auto" | "custom";
 
-export type PastaSyncSettings = {
+export enum PastaExperiment {
+	Cursors = "cursors",
+}
+
+export type PastaSettings = {
 	folders: Map<string, EthersyncFolder>;
+	experiments: Map<PastaExperiment, boolean>;
 	ethersyncBinaryLocation: EthersyncBinaryLocation;
 	ethersyncCustomBinaryPath?: string;
 };
 
-export const PASTA_SYNC_DEFAULT_SETTINGS: PastaSyncSettings = {
+export const PASTA_SYNC_DEFAULT_SETTINGS: PastaSettings = {
 	folders: new Map(),
+	experiments: new Map([[PastaExperiment.Cursors, false]]),
 	ethersyncBinaryLocation: "auto",
 	ethersyncCustomBinaryPath: "",
 };
 
-export function getEthersyncBinary(settings: PastaSyncSettings) {
+export function getEthersyncBinary(settings: PastaSettings) {
 	if (settings.ethersyncBinaryLocation === "auto") {
 		return ETHERSYNC_BINARY_NAME;
 	}
@@ -60,7 +66,7 @@ export class PastaSettingsTab extends PluginSettingTab {
 			});
 
 		if (folders.size > 0) {
-			for (const [id, folder] of folders) {
+			for (const [, folder] of folders) {
 				const setting = new Setting(containerEl).setName(folder.path);
 
 				if (folder.mode === "share") {
@@ -68,14 +74,10 @@ export class PastaSettingsTab extends PluginSettingTab {
 						btn.setIcon("share")
 							.setTooltip("Share")
 							.onClick(() => {
-								const folder = folders.get(id);
-
-								if (folder) {
-									new ShareCodeModal(
-										this.app,
-										folder.shareCode ?? "",
-									).open();
-								}
+								new ShareCodeModal(
+									this.app,
+									folder.shareCode ?? "",
+								).open();
 							});
 					});
 				}

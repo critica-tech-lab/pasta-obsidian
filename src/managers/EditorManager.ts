@@ -2,15 +2,15 @@ import { EditorSelection, Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { App, MarkdownView, TFile } from "obsidian";
 import { backoff } from "src/utils/backoff";
-import { getColorForString } from "../utils/color";
 import { cursorsExtension } from "../editor";
+import { PastaSettings } from "../settings";
+import { PastaEditorCursor } from "../types/editor";
+import { getColorForString } from "../utils/color";
 import {
 	EthersyncClient,
-	EthersyncCursorRange,
 	EthersyncCursorMessage,
+	EthersyncCursorRange,
 } from "../utils/ethersync";
-import { PastaSyncSettings } from "../settings";
-import { PastaEditorCursor } from "../types/editor";
 import { getEthersyncFolder, getVaultBasePath } from "../utils/vault";
 import { EthersyncManager } from "./EthersyncManager";
 
@@ -29,7 +29,7 @@ export class EditorManager {
 
 	constructor(
 		private app: App,
-		private settings: PastaSyncSettings,
+		private settings: PastaSettings,
 		private processManager: EthersyncManager,
 	) {
 		const { extension, updateCursors } = cursorsExtension({
