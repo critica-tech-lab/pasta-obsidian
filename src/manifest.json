@@ -1,11 +1,10 @@
 {
 	"id": "pasta",
 	"name": "Pasta",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "Decentralized real-time collaboration for all",
-	"author": "Pasta",
-	"authorUrl": "https://pasta.works",
-	"isDesktopOnly": false
+	"description": "Ethersync-compatible plugin for Obsidian",
+	"author": "Critica Tech Lab",
+	"authorUrl": "https://github.com/critica-tech-lab/pasta-obsidian",
+	"isDesktopOnly": true
 }
-
