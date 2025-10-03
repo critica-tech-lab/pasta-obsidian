@@ -3,15 +3,13 @@ import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 import { shellEnv } from "shell-env";
-import { createEthersyncFolder } from "./ethersync";
+import { createEthersyncFolder, ETHERSYNC_VERSION } from "./ethersync";
 
 const DOWNLOADED_FOLDER = ".ethersync";
 const DEFAULT_BINARY_COMMAND = "ethersync";
 
-const DEFAULT_RELEASE_BASE_URL =
-	"https://github.com/ethersync/ethersync/releases/download/v0.7.0/";
+const DEFAULT_RELEASE_BASE_URL = `https://github.com/ethersync/ethersync/releases/download/${ETHERSYNC_VERSION}/`;
 
-// TODO: confirm asset naming once official release artifacts are available.
 const PLATFORM_ASSET_MAP: Record<string, string | undefined> = {
 	"darwin-arm64": "ethersync-universal-apple-darwin.tar.gz",
 	"darwin-x64": "ethersync-universal-apple-darwin.tar.gz",

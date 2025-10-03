@@ -33,5 +33,5 @@
 
 - On "Pasta" settings, click on "Open Advanced settings"
 - For _Ethersync location_, change to "Custom"
-- Click on "Download 0.7.0", a path to the downloaded binary will be used to connect through Ethersync.
+- Click on "Download 0.8.0", a path to the downloaded binary will be used to connect through Ethersync.
 - To confirm, go back to _Pasta settings_ and click on the refresh button. A version of ethersync will be displayed.

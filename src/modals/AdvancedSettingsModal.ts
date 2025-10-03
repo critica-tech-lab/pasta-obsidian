@@ -13,7 +13,7 @@ import {
 	downloadLatestEthersyncBinary,
 	ensureBinaryResponds,
 } from "../utils/binary";
-import { getEthersyncBinary } from "../utils/ethersync";
+import { ETHERSYNC_VERSION, getEthersyncBinary } from "../utils/ethersync";
 import { getVaultBasePath } from "../utils/vault";
 
 export class AdvancedSettingsModal extends Modal {
@@ -132,7 +132,7 @@ export class AdvancedSettingsModal extends Modal {
 			});
 
 		this.downloadSetting = new Setting(containerEl).setName(
-			"Download Ethersync 0.7.0",
+			`Download Ethersync ${ETHERSYNC_VERSION}`,
 		);
 
 		this.downloadSetting.addButton((button) => {

@@ -10,7 +10,7 @@ describe("backoff", () => {
 
 	it("resolves after a single successful attempt without retrying", async () => {
 		const callback = vi
-			.fn<[], Promise<void>>()
+			.fn<() => Promise<void>>()
 			.mockResolvedValue(undefined);
 
 		await backoff(callback, { retries: 3, delayMs: 1000, delayFactor: 2 });
@@ -22,7 +22,7 @@ describe("backoff", () => {
 		vi.useFakeTimers();
 
 		const callback = vi
-			.fn<[], Promise<void>>()
+			.fn<() => Promise<void>>()
 			.mockRejectedValueOnce(new Error("fail 1"))
 			.mockRejectedValueOnce(new Error("fail 2"))
 			.mockResolvedValue(undefined);
@@ -44,7 +44,7 @@ describe("backoff", () => {
 		const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
 
 		const callback = vi
-			.fn<[], Promise<void>>()
+			.fn<() => Promise<void>>()
 			.mockRejectedValue(new Error("boom"));
 
 		const promise = backoff(callback, {
@@ -63,7 +63,7 @@ describe("backoff", () => {
 
 	it("short-circuits when retries are exhausted up front", async () => {
 		const callback = vi
-			.fn<[], Promise<void>>()
+			.fn<() => Promise<void>>()
 			.mockResolvedValue(undefined);
 
 		const result = await backoff(callback, {

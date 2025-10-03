@@ -49,6 +49,7 @@ type ShareProcessOptions = {
 const GIT_FOLDER = ".git";
 const ETHERSYNC_FOLDER = ".ethersync";
 export const ETHERSYNC_BINARY_NAME = "ethersync";
+export const ETHERSYNC_VERSION = "v0.8.0";
 const ETHERSYNC_JOIN_CODE_REGEX = /ethersync join ([\w-]+)/;
 const DEFAULT_CURSOR_RANGE: EthersyncCursorRange = {
 	start: { character: 0, line: 0 },

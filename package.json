@@ -1,6 +1,6 @@
 {
 	"name": "pasta-obsidian",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "Ethersync-compatible plugin for Obsidian",
 	"main": "dist/main.js",
 	"scripts": {
